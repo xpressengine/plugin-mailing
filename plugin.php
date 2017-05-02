@@ -2,15 +2,11 @@
 namespace Xpressengine\Plugins\Mailing;
 
 use Illuminate\Database\Schema\Blueprint;
-use Schema;
-use XeFrontend;
-use XePresenter;
 use Route;
-use Xpressengine\Http\Request;
+use Schema;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Mailing\Commands\AgreeCommand;
 use Xpressengine\Plugins\Mailing\Commands\ReconfirmCommand;
-use Xpressengine\Plugins\Mailing\Jobs\ReconfirmJob;
 
 class Plugin extends AbstractPlugin
 {
@@ -34,6 +30,46 @@ class Plugin extends AbstractPlugin
                 }
             ]
         );
+
+        intercept('XeUser@getRegisterForms', 'mailing@form', function($target, $token) {
+
+            $forms = $target($token);
+
+            $idx = array_search('agreements', array_keys($forms)) + 1;
+
+            $updated = [];
+            foreach ($forms as $id => $form) {
+                $updated[$id] = $form;
+                if($id === 'agreements') {
+                    $updated['mailing@agreement'] = function ($token) {
+                        return '<div class="xe-input-group">
+                                    <label class="xe-label">
+                                        <input type="checkbox" name="agree_mailing" value="on">
+                                        <span class="xe-input-helper"></span>
+                                        <span class="xe-label-text">
+                                            이벤트 및 프로모션 이메일을 수신합니다.
+                                        </span>
+                                    </label>
+                                </div>';
+                    };
+                }
+            }
+            return $updated;
+        });
+
+        intercept('XeUser@create', 'mailing@create', function($target, $data, $token = null) {
+
+            $agree = array_get($data, 'agree_mailing');
+
+            $user = $target($data, $token);
+
+            if($agree === 'on') {
+                app('mailing::handler')->agree($user->id);
+            }
+            return $user;
+        });
+
+
 
 
     }
@@ -81,7 +117,7 @@ class Plugin extends AbstractPlugin
     {
         Route::fixed(static::getId(), function(){
             Route::group(['namespace'=>'Xpressengine\Plugins\Mailing\Controllers'], function(){
-                Route::get('users/{user_id}/mailing', ['as' => 'mailing::deny.show', 'uses' => 'Controller@index']);
+                Route::get('users/{user_id}/mailing', ['as' => 'mailing::deny.show', 'uses' => 'Controller@show']);
                 Route::put('users/{user_id}/mailing', ['as' => 'mailing::deny.update', 'uses' => 'Controller@update']);
 
                 Route::get('user/setting', ['as' => 'mailing::setting.show', 'uses' => 'SettingController@show', 'middleware'=> 'auth']);
