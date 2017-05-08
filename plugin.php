@@ -35,8 +35,6 @@ class Plugin extends AbstractPlugin
 
             $forms = $target($token);
 
-            $idx = array_search('agreements', array_keys($forms)) + 1;
-
             $updated = [];
             foreach ($forms as $id => $form) {
                 $updated[$id] = $form;
