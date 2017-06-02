@@ -1,6 +1,7 @@
 <?php
 namespace Xpressengine\Plugins\Mailing\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Xpressengine\Plugins\Mailing\Handler;
 
@@ -46,9 +47,10 @@ class ReconfirmCommand extends Command
         $users = $this->handler->choose();
 
         $count = $users->count();
+        $now = Carbon::now();
 
-        if($count === 0) {
-            $this->warn('No users to be notified about the agreement to mailing.');
+        if ($count === 0) {
+            $this->warn("[{$now->format('Y.m.d H:i:s')}] No users to be notified about the agreement to mailing.");
             return;
         }
 
@@ -62,6 +64,6 @@ class ReconfirmCommand extends Command
         }
         $count = $this->handler->reconfirm($users);
 
-        $this->warn("Emails ware sent to $count users.".PHP_EOL);
+        $this->warn("[{$now->format('Y.m.d H:i:s')}] Emails were sent to $count users to reconfirm mailing.".PHP_EOL);
     }
 }

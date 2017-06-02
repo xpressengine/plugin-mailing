@@ -1,4 +1,5 @@
 <?php
+
 namespace Xpressengine\Plugins\Mailing;
 
 use Illuminate\Database\Schema\Blueprint;
@@ -31,37 +32,47 @@ class Plugin extends AbstractPlugin
             ]
         );
 
-        intercept('XeUser@getRegisterForms', 'mailing@form', function($target, $token) {
+        intercept(
+            'XeUser@getRegisterForms',
+            'mailing@form',
+            function ($target, $token) {
 
-            $forms = $target($token);
+                $forms = $target($token);
 
-            $updated = [];
-            foreach ($forms as $id => $form) {
-                $updated[$id] = $form;
-                if($id === 'agreements') {
-                    $updated['mailing@agreement'] = function ($token) {
-                        return view($this->view('views.register'));
-                    };
+                $updated = [];
+                foreach ($forms as $id => $form) {
+                    $updated[$id] = $form;
+                    if ($id === 'agreements') {
+                        $updated['mailing@agreement'] = function ($token) {
+                            return view($this->view('views.register'));
+                        };
+                    }
                 }
+                return $updated;
             }
-            return $updated;
-        });
+        );
 
-        intercept('XeUser@create', 'mailing@create', function($target, $data, $token = null) {
+        intercept(
+            'XeUser@create',
+            'mailing@create',
+            function ($target, $data, $token = null) {
 
-            $agree = array_get($data, 'agree_mailing');
+                $agree = array_get($data, 'agree_mailing');
 
-            $user = $target($data, $token);
+                $user = $target($data, $token);
 
-            if($agree === 'on') {
-                app('mailing::handler')->agree($user->id);
+                if ($agree === 'on') {
+                    app('mailing::handler')->agree($user->id);
+                }
+                return $user;
             }
-            return $user;
-        });
+        );
 
-
-
-
+        $schedule = app('Illuminate\Console\Scheduling\Schedule');
+        $at = array_get($this->config(), 'scheduled_at');
+        if ($at) {
+            $schedule->command('mailing:reconfirm')->dailyAt($at)->appendOutputTo('storage/logs/mailing.log');
+        }
     }
 
     protected function register()
@@ -99,21 +110,48 @@ class Plugin extends AbstractPlugin
         );
     }
 
-    public function config() {
+    public function config()
+    {
         return config('services.mailing');
     }
 
     protected function route()
     {
-        Route::fixed(static::getId(), function(){
-            Route::group(['namespace'=>'Xpressengine\Plugins\Mailing\Controllers'], function(){
-                Route::get('users/{user_id}/mailing', ['as' => 'mailing::deny.show', 'uses' => 'Controller@show']);
-                Route::put('users/{user_id}/mailing', ['as' => 'mailing::deny.update', 'uses' => 'Controller@update']);
+        Route::fixed(
+            static::getId(),
+            function () {
+                Route::group(
+                    ['namespace' => 'Xpressengine\Plugins\Mailing\Controllers'],
+                    function () {
+                        Route::get(
+                            'users/{user_id}/mailing',
+                            ['as' => 'mailing::deny.show', 'uses' => 'Controller@show']
+                        );
+                        Route::put(
+                            'users/{user_id}/mailing',
+                            ['as' => 'mailing::deny.update', 'uses' => 'Controller@update']
+                        );
 
-                Route::get('user/setting', ['as' => 'mailing::setting.show', 'uses' => 'SettingController@show', 'middleware'=> 'auth']);
-                Route::put('user/setting', ['as' => 'mailing::setting.update', 'uses' => 'SettingController@update', 'middleware'=> 'auth']);
-            });
-        });
+                        Route::get(
+                            'user/setting',
+                            [
+                                'as' => 'mailing::setting.show',
+                                'uses' => 'SettingController@show',
+                                'middleware' => 'auth'
+                            ]
+                        );
+                        Route::put(
+                            'user/setting',
+                            [
+                                'as' => 'mailing::setting.update',
+                                'uses' => 'SettingController@update',
+                                'middleware' => 'auth'
+                            ]
+                        );
+                    }
+                );
+            }
+        );
     }
 
     /**
@@ -135,38 +173,40 @@ class Plugin extends AbstractPlugin
      */
     public function install()
     {
-        if(!Schema::hasTable('mailing')) {
-            Schema::create('mailing', function (Blueprint $table) {
-                $table->engine = "InnoDB";
+        if (!Schema::hasTable('mailing')) {
+            Schema::create(
+                'mailing',
+                function (Blueprint $table) {
+                    $table->engine = "InnoDB";
 
-                //user_id VARCHAR(36) PRIMARY KEY NOT NULL,
-                $table->string('userId', 36);
-                $table->char('status', 20);
-                $table->string('denyToken', 36)->nullable();
-                $table->timestamp('createdAt')->index();
-                $table->timestamp('updatedAt')->index();
-                $table->primary('userId');
-
-            });
+                    //user_id VARCHAR(36) PRIMARY KEY NOT NULL,
+                    $table->string('userId', 36);
+                    $table->char('status', 20);
+                    $table->string('denyToken', 36)->nullable();
+                    $table->timestamp('createdAt')->index();
+                    $table->timestamp('updatedAt')->index();
+                    $table->primary('userId');
+                }
+            );
         }
 
-        if(!Schema::hasTable('mailing_log')) {
-            Schema::create('mailing_log', function (Blueprint $table) {
-                $table->engine = "InnoDB";
+        if (!Schema::hasTable('mailing_log')) {
+            Schema::create(
+                'mailing_log',
+                function (Blueprint $table) {
+                    $table->engine = "InnoDB";
 
-                $table->increments('id');
-                $table->string('userId', 36);
-                $table->string('action', 20); //
-                $table->string('result', 20); // successd, failed
-                $table->string('content');
-                $table->timestamp('createdAt')->index();
-                $table->timestamp('updatedAt');
-                $table->index('userId');
-            });
+                    $table->increments('id');
+                    $table->string('userId', 36);
+                    $table->string('action', 20); //
+                    $table->string('result', 20); // successd, failed
+                    $table->string('content');
+                    $table->timestamp('createdAt')->index();
+                    $table->timestamp('updatedAt');
+                    $table->index('userId');
+                }
+            );
         }
-
-
-
     }
 
     /**
