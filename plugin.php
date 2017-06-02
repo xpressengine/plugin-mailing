@@ -40,15 +40,7 @@ class Plugin extends AbstractPlugin
                 $updated[$id] = $form;
                 if($id === 'agreements') {
                     $updated['mailing@agreement'] = function ($token) {
-                        return '<div class="xe-input-group">
-                                    <label class="xe-label">
-                                        <input type="checkbox" name="agree_mailing" value="on">
-                                        <span class="xe-input-helper"></span>
-                                        <span class="xe-label-text">
-                                            이벤트 및 프로모션 이메일을 수신합니다.
-                                        </span>
-                                    </label>
-                                </div>';
+                        return view($this->view('views.register'));
                     };
                 }
             }
