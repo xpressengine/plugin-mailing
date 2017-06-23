@@ -4,8 +4,8 @@
  *
  * PHP version 5
  *
- * @category
- * @package     Xpressengine\
+ * @category    Plugins
+ * @package     Xpressengine\Plugins\Mailing
  * @author      XE Team (developers) <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
  * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
@@ -24,8 +24,8 @@ use Xpressengine\Plugins\Mailing\Models\User;
 use Xpressengine\User\UserHandler;
 
 /**
- * @category
- * @package     Xpressengine\Plugins\Freezer
+ * @category    Plugins
+ * @package     Xpressengine\Plugins\Mailing
  * @author      XE Team (developers) <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
  * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
