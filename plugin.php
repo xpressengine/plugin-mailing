@@ -44,6 +44,16 @@ class Plugin extends AbstractPlugin
                 $artisan->resolveCommands($commands);
             }
         );
+
+        // set configuration
+        $config = config('services.mailing');
+        $default = include('config.php');
+        if ($config) {
+            $new = array_replace_recursive($default, $config);
+            config(['services.mailing' => $new]);
+        } else {
+            config(['services.mailing' => $default]);
+        }
     }
 
     /**
