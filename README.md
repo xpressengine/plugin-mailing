@@ -1,4 +1,4 @@
-# plugin-freezer
+# plugin-mailing
 
 이 어플리케이션은 Xpressengine3(이하 XE3)의 플러그인입니다.
 
@@ -82,12 +82,12 @@ $ php artisan mailing:reconfirm
 `$ php artisan mailing:agree [USER_ID]` 명령을 사용하십시오.
 
 ```
-$ $ php artisan mailing:agree aa972e8b-6a73-459a-af18-22e7991d43ad
+$ php artisan mailing:agree aa972e8b-6a73-459a-af18-22e7991d43ad
   
-   Do you will make 'khongchi' user to be agreed to mailing . Do you want to execute it? (yes/no) [no]:
-   > yes
-  
-  finished
+ Do you will make 'khongchi' user to be agreed to mailing . Do you want to execute it? (yes/no) [no]:
+ > yes
+
+finished
 ```
 
 
