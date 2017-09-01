@@ -76,24 +76,16 @@ class Plugin extends AbstractPlugin
             ]
         );
 
-        intercept(
-            'XeUser@getRegisterForms',
-            'mailing@form',
-            function ($target, $token) {
-
-                $forms = $target($token);
-
-                $updated = [];
-                foreach ($forms as $id => $form) {
-                    $updated[$id] = $form;
-                    if ($id === 'agreements') {
-                        $updated['mailing@agreement'] = function ($token) {
-                            return view($this->view('views.register'));
-                        };
-                    }
-                }
-                return $updated;
-            }
+        app('xe.register')->push(
+            'user/register/form',
+            'mailing',
+            [
+                'title' => '프로모션 메일링 수신 동의',
+                'description' => '프로모션 메일링 수신의 동의를 위한 체크박스 입니다.',
+                'forced' => false,
+                'render' => function ($token) {
+                    return view($this->view('views.register'));
+                }]
         );
 
         intercept(
