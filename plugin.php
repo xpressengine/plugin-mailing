@@ -13,13 +13,11 @@ class Plugin extends AbstractPlugin
 {
     public function register()
     {
-        app()->singleton(
-            ['mailing::handler' => Handler::class],
-            function ($app) {
-                $proxyClass = app('xe.interception')->proxy(Handler::class, 'Mailing');
-                return new $proxyClass($this, app('xe.user'));
-            }
-        );
+        app()->singleton(Handler::class, function ($app) {
+            $proxyClass = app('xe.interception')->proxy(Handler::class, 'Mailing');
+            return new $proxyClass($this, app('xe.user'));
+        });
+        app()->alias(Handler::class, 'mailing::handler');
 
         // register commands
         app()->singleton(
