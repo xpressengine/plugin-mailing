@@ -179,12 +179,12 @@ class Plugin extends AbstractPlugin
                     $table->engine = "InnoDB";
 
                     //user_id VARCHAR(36) PRIMARY KEY NOT NULL,
-                    $table->string('userId', 36);
+                    $table->string('user_id', 36);
                     $table->char('status', 20);
-                    $table->string('denyToken', 36)->nullable();
-                    $table->timestamp('createdAt')->index();
-                    $table->timestamp('updatedAt')->index();
-                    $table->primary('userId');
+                    $table->string('deny_token', 36)->nullable();
+                    $table->timestamp('created_at')->index();
+                    $table->timestamp('updated_at')->index();
+                    $table->primary('user_id');
                 }
             );
         }
@@ -196,13 +196,13 @@ class Plugin extends AbstractPlugin
                     $table->engine = "InnoDB";
 
                     $table->increments('id');
-                    $table->string('userId', 36);
+                    $table->string('user_id', 36);
                     $table->string('action', 20); //
                     $table->string('result', 20); // successd, failed
                     $table->string('content');
-                    $table->timestamp('createdAt')->index();
-                    $table->timestamp('updatedAt');
-                    $table->index('userId');
+                    $table->timestamp('created_at')->index();
+                    $table->timestamp('updated_at');
+                    $table->index('user_id');
                 }
             );
         }

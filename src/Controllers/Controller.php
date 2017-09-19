@@ -56,7 +56,7 @@ class Controller extends Origin
         $status = $request->get('status');
         $token = $request->get('token');
 
-        $mailing = Mailing::where('userId', $user_id)->where('status', 'agreed')->where('denyToken', $token)->first();
+        $mailing = Mailing::where('user_id', $user_id)->where('status', 'agreed')->where('deny_token', $token)->first();
 
         if($mailing === null) {
             throw new HttpException('400', '토큰정보가 틀렸거나 만료된 토큰입니다.');

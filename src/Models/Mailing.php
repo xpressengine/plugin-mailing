@@ -25,18 +25,15 @@ use Illuminate\Database\Eloquent\Model;
      */
 class Mailing extends Model
 {
-    const CREATED_AT = 'createdAt';
-    const UPDATED_AT = 'updatedAt';
-
     protected $table = 'mailing';
 
-    protected $primaryKey = 'userId';
+    protected $primaryKey = 'user_id';
 
     public $timestamps = true;
 
     public function user()
     {
-        $this->belongsTo(User::class, 'userId');
+        $this->belongsTo(User::class, 'user_id');
     }
 
 }

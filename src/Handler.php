@@ -76,9 +76,9 @@ class Handler
 
         // 동의한 후보 중에 reconfirm을 보내지 않은 후보 선별하기
         $candidates = User::whereHas('mailing', function($q) use($eventDate) {
-            return $q->where('status', 'agreed')->where('updatedAt', '<', $eventDate);
+            return $q->where('status', 'agreed')->where('updated_at', '<', $eventDate);
         })->with(['mailing_logs' => function ($q) {
-            return $q->orderBy('createdAt', 'desc');
+            return $q->orderBy('created_at', 'desc');
         }])->get();
 
         foreach ($candidates as $user) {
@@ -139,9 +139,9 @@ class Handler
             $user = User::find($user_id);
 
             $mailing = Mailing::findOrNew($user_id);
-            $mailing->userId = $user_id;
+            $mailing->user_id = $user_id;
             $mailing->status = 'agreed';
-            $mailing->denyToken = app('xe.keygen')->generate();
+            $mailing->deny_token = app('xe.keygen')->generate();
             $mailing->save();
 
             $user->mailing = $mailing;
@@ -160,13 +160,13 @@ class Handler
             $user = $this->handler->find($user_id);
 
             if($token !== null) {
-                $mailing = Mailing::where('denyToken', $token)->where('userId', $user_id)->first();
+                $mailing = Mailing::where('deny_token', $token)->where('user_id', $user_id)->first();
                 if($mailing === null) {
                     throw new InvalidTokenException();
                 }
             } else {
                 $mailing = Mailing::findOrNew($user_id);
-                $mailing->userId = $user_id;
+                $mailing->user_id = $user_id;
             }
 
             $mailing->status = 'denied';
@@ -186,7 +186,7 @@ class Handler
     {
         // action = agreed, denied, reconfirmed
         $log = new Log();
-        $log->userId = $user_id;
+        $log->user_id = $user_id;
         $log->action = $action;
         $log->result = $result;
         $log->content = $content;

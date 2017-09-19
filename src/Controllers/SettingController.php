@@ -113,11 +113,11 @@ class SettingController extends Origin
     protected function getMailing(Request $request)
     {
         $user = $request->user();
-        $mailing = Mailing::where('userId', $user->id)->first();
+        $mailing = Mailing::where('user_id', $user->id)->first();
 
         if ($mailing === null) {
             $mailing = new Mailing();
-            $mailing->userId = $user->id;
+            $mailing->user_id = $user->id;
             $mailing->status = 'denied';
             return $mailing;
         }

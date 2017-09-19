@@ -28,11 +28,11 @@ class User extends OriginUser
 {
     public function mailing_logs()
     {
-        return $this->hasMany(Log::class, 'userId');
+        return $this->hasMany(Log::class, 'user_id');
     }
 
     public function mailing()
     {
-        return $this->hasOne(Mailing::class, 'userId');
+        return $this->hasOne(Mailing::class, 'user_id');
     }
 }
