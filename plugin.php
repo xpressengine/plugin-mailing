@@ -8,6 +8,8 @@ use Schema;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Mailing\Commands\AgreeCommand;
 use Xpressengine\Plugins\Mailing\Commands\ReconfirmCommand;
+use Xpressengine\Plugins\Mailing\Parts\MailingAgreePart;
+use Xpressengine\User\UserHandler;
 
 class Plugin extends AbstractPlugin
 {
@@ -63,28 +65,14 @@ class Plugin extends AbstractPlugin
     {
         $this->route();
 
-        app('xe.register')->push(
-            'user/settings/section',
-            'mailing@agreement',
-            [
-                'title' => '프로모션 메일링 설정',
-                'content' => function () {
-                    return app()->call('Xpressengine\Plugins\Mailing\Controllers\SettingController@index');
-                }
-            ]
-        );
+        UserHandler::setSettingsSections('mailing@agreement', [
+            'title' => '프로모션 메일링 설정',
+            'content' => function () {
+                return app()->call('Xpressengine\Plugins\Mailing\Controllers\SettingController@index');
+            }
+        ]);
 
-        app('xe.register')->push(
-            'user/register/form',
-            'mailing',
-            [
-                'title' => '프로모션 메일링 수신 동의',
-                'description' => '프로모션 메일링 수신의 동의를 위한 체크박스 입니다.',
-                'forced' => false,
-                'render' => function ($token) {
-                    return view($this->view('views.register'));
-                }]
-        );
+        UserHandler::addRegisterPart(MailingAgreePart::class);
 
         intercept(
             'XeUser@create',
