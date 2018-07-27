@@ -31,21 +31,6 @@ use Xpressengine\Plugins\Mailing\Plugin;
  */
 class Controller extends Origin
 {
-    /**
-     * @var Plugin
-     */
-    protected $plugin;
-
-    /**
-     * SocialLoginController constructor.
-     *
-     * @param \Xpressengine\Plugins\Mailing\Plugin $plugin
-     */
-    public function __construct(Plugin $plugin)
-    {
-        $this->plugin = $plugin;
-    }
-
     public function show(Request $request, $user_id)
     {
         $this->validate($request, [
@@ -62,7 +47,7 @@ class Controller extends Origin
             throw new HttpException('400', '토큰정보가 틀렸거나 만료된 토큰입니다.');
         }
 
-        return app('xe.presenter')->make($this->plugin->view('views.deny'), compact('user_id', 'token'));
+        return app('xe.presenter')->make('mailing::views.deny', compact('user_id', 'token'));
     }
 
     public function update(Request $request, Handler $handler, $user_id)

@@ -6,7 +6,7 @@
 
         <div class="setting-group-content __xe_mailing">
 
-            @include($plugin->view('views.user.show'))
+            @include('mailing::views.user.show')
         </div>
     </div>
 </div>

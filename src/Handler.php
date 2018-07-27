@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Xpressengine\Plugins\Mailing\Exceptions\InvalidTokenException;
 use Xpressengine\Plugins\Mailing\Jobs\ReconfirmJob;
+use Xpressengine\Plugins\Mailing\Mails\Agree;
+use Xpressengine\Plugins\Mailing\Mails\Mail;
 use Xpressengine\Plugins\Mailing\Models\Log;
 use Xpressengine\Plugins\Mailing\Models\Mailing;
 use Xpressengine\Plugins\Mailing\Models\User;
@@ -36,30 +38,23 @@ class Handler
     use DispatchesJobs;
 
     /**
-     * @var Plugin
+     * @var array
      */
-    protected $plugin;
-
-    /**
-     * @var UserHandler
-     */
-    protected $handler;
+    protected $config = [];
 
     /**
      * Handler constructor.
      *
-     * @param Plugin $plugin
+     * @param array $config
      */
-    public function __construct(Plugin $plugin, UserHandler $handler)
+    public function __construct(array $config)
     {
-        $this->plugin = $plugin;
-        $this->handler = $handler;
+        $this->config = $config;
     }
 
     public function config($field = null, $default = null)
     {
-        $config = $this->plugin->config();
-        return array_get($config, $field, $default);
+        return array_get($this->config, $field, $default);
     }
 
     /**
@@ -157,7 +152,7 @@ class Handler
     public function deny($user_id, $token = null)
     {
         try {
-            $user = $this->handler->find($user_id);
+            $user = User::find($user_id);
 
             if($token !== null) {
                 $mailing = Mailing::where('deny_token', $token)->where('user_id', $user_id)->first();
@@ -195,25 +190,14 @@ class Handler
 
     protected function sendEmail($user, $type)
     {
-        $subject = $this->config("email.$type.subject");
-
-        $content = $this->config("email.$type.content");
-
-        $content = $content($user, $type, $this->config());
-
-        // type = freeze, delete, unfreeze, notify
-        $view = $this->plugin->view('views.email') ;
-        $emailAddr = $user->email;
-        if($emailAddr) {
-            app('mailer')->queue(
-                $view,
-                compact('content'),
-                function ($message) use ($emailAddr, $subject) {
-                    $message->to($emailAddr)->subject($subject);
-                },
-                'sync'
-            );
+        if (!$user->email) {
+            return false;
         }
-    }
 
+        $subject = $this->config("email.$type.subject");
+        $content = call_user_func($this->config("email.$type.content"), $user, $type, $this->config());
+
+        $message = (new Mail($user))->subject($subject)->with('content', $content);
+        app('mailer')->queue($message);
+    }
 }

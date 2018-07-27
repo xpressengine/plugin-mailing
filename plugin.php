@@ -17,7 +17,7 @@ class Plugin extends AbstractPlugin
     {
         app()->singleton(Handler::class, function ($app) {
             $proxyClass = app('xe.interception')->proxy(Handler::class, 'Mailing');
-            return new $proxyClass($this, app('xe.user'));
+            return new $proxyClass(config('services.mailing'));
         });
         app()->alias(Handler::class, 'mailing::handler');
 
@@ -91,15 +91,10 @@ class Plugin extends AbstractPlugin
         );
 
         $schedule = app('Illuminate\Console\Scheduling\Schedule');
-        $at = array_get($this->config(), 'scheduled_at');
+        $at = config('services.mailing.scheduled_at');
         if ($at) {
             $schedule->command('mailing:reconfirm')->dailyAt($at)->appendOutputTo('storage/logs/mailing.log');
         }
-    }
-
-    public function config()
-    {
-        return config('services.mailing');
     }
 
     protected function route()

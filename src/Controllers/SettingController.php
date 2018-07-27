@@ -29,26 +29,9 @@ use Xpressengine\Plugins\Mailing\Plugin;
  */
 class SettingController extends Origin
 {
-    /**
-     * @var Plugin
-     */
-    protected $plugin;
-
-    /**
-     * SocialLoginController constructor.
-     *
-     * @param \Xpressengine\Plugins\Mailing\Plugin $plugin
-     */
-    public function __construct(Plugin $plugin)
-    {
-        $this->plugin = $plugin;
-    }
-
     public function index(Request $request)
     {
         $mailing = $this->getMailing($request);
-        $plugin = $this->plugin;
-
 
         app('xe.frontend')->js('assets/vendor/bootstrap/js/bootstrap.min.js')->appendTo('head')->load();
         app('xe.frontend')->js(
@@ -57,15 +40,14 @@ class SettingController extends Origin
                 'assets/core/xe-ui-component/js/xe-form.js'
             ]
         )->load();
-        return view($this->plugin->view('views.user.index'), compact('plugin', 'mailing'));
+        return view('mailing::views.user.index', compact('mailing'));
     }
 
     public function show(Request $request)
     {
         $mailing = $this->getMailing($request);
-        $plugin = $this->plugin;
 
-        return apiRender($this->plugin->view('views.user.show'), compact('plugin', 'mailing'));
+        return api_render('mailing::views.user.show', compact('mailing'));
     }
 
     public function update(Request $request, Handler $handler)
