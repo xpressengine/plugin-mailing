@@ -15,15 +15,12 @@ namespace Xpressengine\Plugins\Mailing;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 use Xpressengine\Plugins\Mailing\Exceptions\InvalidTokenException;
 use Xpressengine\Plugins\Mailing\Jobs\ReconfirmJob;
-use Xpressengine\Plugins\Mailing\Mails\Agree;
 use Xpressengine\Plugins\Mailing\Mails\Mail;
 use Xpressengine\Plugins\Mailing\Models\Log;
 use Xpressengine\Plugins\Mailing\Models\Mailing;
 use Xpressengine\Plugins\Mailing\Models\User;
-use Xpressengine\User\UserHandler;
 
 /**
  * @category    Plugins
@@ -35,8 +32,6 @@ use Xpressengine\User\UserHandler;
  */
 class Handler
 {
-    use DispatchesJobs;
-
     /**
      * @var array
      */
@@ -98,12 +93,12 @@ class Handler
             $user_ids[] = $user->id;
 
             if(count($user_ids) === $size) {
-                $this->dispatch(new ReconfirmJob($user_ids));
+                ReconfirmJob::dispatch($user_ids);
                 $user_ids = [];
             }
         }
         if(count($user_ids)) {
-            $this->dispatch(new ReconfirmJob($user_ids));
+            ReconfirmJob::dispatch($user_ids);
         }
 
         return $users->count();
