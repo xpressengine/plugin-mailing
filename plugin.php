@@ -122,7 +122,7 @@ class Plugin extends AbstractPlugin
                                 'middleware' => 'auth'
                             ]
                         );
-                        Route::put(
+                        Route::post(
                             'user/setting',
                             [
                                 'as' => 'mailing::setting.update',

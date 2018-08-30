@@ -1,4 +1,4 @@
-<form action="{{ route('mailing::setting.update') }}" method="put" data-submit="xe-ajax" data-callback="updateMailing">
+<form action="{{ route('mailing::setting.update') }}" method="post" data-submit="xe-ajax" data-callback="updateMailing">
     @if($mailing->status === 'agreed')
         <input type="hidden" name="status" value="denied">
         <div class="setting-left on">
