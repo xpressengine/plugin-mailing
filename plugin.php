@@ -3,6 +3,7 @@
 namespace Xpressengine\Plugins\Mailing;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Console\Application as Artisan;
 use Route;
 use Schema;
 use Xpressengine\Plugin\AbstractPlugin;
@@ -38,12 +39,9 @@ class Plugin extends AbstractPlugin
 
 
         $commands = ['mailing::command.reconfirm', 'mailing::command.agree'];
-        app('events')->listen(
-            'artisan.start',
-            function ($artisan) use ($commands) {
-                $artisan->resolveCommands($commands);
-            }
-        );
+        Artisan::starting(function ($artisan) use ($commands) {
+            $artisan->resolveCommands($commands);
+        });
 
         // set configuration
         $config = config('services.mailing');
