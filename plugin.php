@@ -1,4 +1,18 @@
 <?php
+/**
+ * Plugin.php
+ *
+ * This file is part of the Xpressengine package.
+ *
+ * PHP version 5
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        http://www.xpressengine.com
+ */
 
 namespace Xpressengine\Plugins\Mailing;
 
@@ -12,8 +26,23 @@ use Xpressengine\Plugins\Mailing\Commands\ReconfirmCommand;
 use Xpressengine\Plugins\Mailing\Parts\MailingAgreePart;
 use Xpressengine\User\UserHandler;
 
+/**
+ * Plugin
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        http://www.xpressengine.com
+ */
 class Plugin extends AbstractPlugin
 {
+    /**
+     * register
+     *
+     * @return void
+     */
     public function register()
     {
         app()->singleton(Handler::class, function ($app) {
@@ -36,7 +65,6 @@ class Plugin extends AbstractPlugin
                 return new AgreeCommand(app('mailing::handler'));
             }
         );
-
 
         $commands = ['mailing::command.reconfirm', 'mailing::command.agree'];
         Artisan::starting(function ($artisan) use ($commands) {
@@ -95,6 +123,11 @@ class Plugin extends AbstractPlugin
         }
     }
 
+    /**
+     * register route
+     *
+     * @return void
+     */
     protected function route()
     {
         Route::fixed(

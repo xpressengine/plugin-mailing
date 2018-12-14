@@ -1,16 +1,19 @@
 <?php
 /**
- *  This file is part of the Xpressengine package.
+ * SettingController.php
+ *
+ * This file is part of the Xpressengine package.
  *
  * PHP version 5
  *
- * @category
+ * @category    Mailing
  * @package     Xpressengine\Plugins\Mailing
- * @author      XE Team (developers) <developers@xpressengine.com>
+ * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        http://www.xpressengine.com
  */
+
 namespace Xpressengine\Plugins\Mailing\Controllers;
 
 use App\Http\Controllers\Controller as Origin;
@@ -20,15 +23,24 @@ use Xpressengine\Plugins\Mailing\Models\Mailing;
 use Xpressengine\Plugins\Mailing\Plugin;
 
 /**
+ * SettingController
+ *
  * @category    Mailing
- * @package     Xpressengine\Plugins\Mailing\Controllers
- * @author      XE Team (developers) <developers@xpressengine.com>
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        http://www.xpressengine.com
  */
 class SettingController extends Origin
 {
+    /**
+     * index
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index(Request $request)
     {
         $mailing = $this->getMailing($request);
@@ -43,6 +55,13 @@ class SettingController extends Origin
         return view('mailing::views.user.index', compact('mailing'));
     }
 
+    /**
+     * show
+     *
+     * @param Request $request request
+     *
+     * @return mixed
+     */
     public function show(Request $request)
     {
         $mailing = $this->getMailing($request);
@@ -50,6 +69,15 @@ class SettingController extends Origin
         return api_render('mailing::views.user.show', compact('mailing'));
     }
 
+    /**
+     * update
+     *
+     * @param Request $request request
+     * @param Handler $handler handler
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function update(Request $request, Handler $handler)
     {
 
@@ -59,13 +87,13 @@ class SettingController extends Origin
 
         $status = $request->get('status');
 
-        if($status !== 'agreed') {
+        if ($status !== 'agreed') {
             $status = 'denied';
         }
 
         \DB::beginTransaction();
         try {
-            if($status === 'agreed') {
+            if ($status === 'agreed') {
                 $handler->agree($request->user()->id);
             } else {
                 $handler->deny($request->user()->id);
@@ -82,13 +110,12 @@ class SettingController extends Origin
                 'message' => '수정되었습니다.'
             ]
         );
-
     }
 
     /**
      * getMailing
      *
-     * @param Request $request
+     * @param Request $request request
      *
      * @return Mailing
      */
@@ -103,6 +130,7 @@ class SettingController extends Origin
             $mailing->status = 'denied';
             return $mailing;
         }
+
         return $mailing;
-}
+    }
 }

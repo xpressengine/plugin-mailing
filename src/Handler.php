@@ -1,16 +1,19 @@
 <?php
 /**
- *  This file is part of the Xpressengine package.
+ * Handler.php
+ *
+ * This file is part of the Xpressengine package.
  *
  * PHP version 5
  *
- * @category    Plugins
+ * @category    Mailing
  * @package     Xpressengine\Plugins\Mailing
- * @author      XE Team (developers) <developers@xpressengine.com>
+ * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        http://www.xpressengine.com
  */
+
 namespace Xpressengine\Plugins\Mailing;
 
 use Carbon\Carbon;
@@ -23,11 +26,13 @@ use Xpressengine\Plugins\Mailing\Models\Mailing;
 use Xpressengine\Plugins\Mailing\Models\User;
 
 /**
- * @category    Plugins
+ * Handler
+ *
+ * @category    Mailing
  * @package     Xpressengine\Plugins\Mailing
- * @author      XE Team (developers) <developers@xpressengine.com>
+ * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        http://www.xpressengine.com
  */
 class Handler
@@ -40,13 +45,21 @@ class Handler
     /**
      * Handler constructor.
      *
-     * @param array $config
+     * @param array $config config
      */
     public function __construct(array $config)
     {
         $this->config = $config;
     }
 
+    /**
+     * config
+     *
+     * @param null|string $field   field
+     * @param null|mixed  $default default
+     *
+     * @return mixed
+     */
     public function config($field = null, $default = null)
     {
         return array_get($this->config, $field, $default);
@@ -65,7 +78,7 @@ class Handler
         $eventDate = Carbon::now()->subDays($duration);
 
         // 동의한 후보 중에 reconfirm을 보내지 않은 후보 선별하기
-        $candidates = User::whereHas('mailing', function($q) use($eventDate) {
+        $candidates = User::whereHas('mailing', function ($q) use ($eventDate) {
             return $q->where('status', 'agreed')->where('updated_at', '<', $eventDate);
         })->with(['mailing_logs' => function ($q) {
             return $q->orderBy('created_at', 'desc');
@@ -73,18 +86,25 @@ class Handler
 
         foreach ($candidates as $user) {
             $latestLog = $user->mailing_logs->first();
-            if(data_get($latestLog, 'action') !== 'reconfirm') {
+            if (data_get($latestLog, 'action') !== 'reconfirm') {
                 $users->add($user);
             }
         }
         return $users;
     }
 
+    /**
+     * reconfirm
+     *
+     * @param null|User $users users
+     *
+     * @return int
+     */
     public function reconfirm($users = null)
     {
         $size = $this->config('queue_size', 1);
 
-        if($users === null) {
+        if ($users === null) {
             $users = $this->choose();
         }
 
@@ -92,21 +112,29 @@ class Handler
         foreach ($users as $user) {
             $user_ids[] = $user->id;
 
-            if(count($user_ids) === $size) {
+            if (count($user_ids) === $size) {
                 ReconfirmJob::dispatch($user_ids);
                 $user_ids = [];
             }
         }
-        if(count($user_ids)) {
+        if (count($user_ids)) {
             ReconfirmJob::dispatch($user_ids);
         }
 
         return $users->count();
     }
 
+    /**
+     * reconfirm user
+     *
+     * @param array|string $user_ids user id or user ids
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function reconfirmUser($user_ids)
     {
-        if(is_string($user_ids)) {
+        if (is_string($user_ids)) {
             $user_ids = [$user_ids];
         }
 
@@ -116,13 +144,21 @@ class Handler
             try {
                 $this->sendEmail($user, 'reconfirm');
             } catch (\Exception $e) {
-                $this->logging($user->id, 'reconfirm', ['message'=>$e->getMessage()], 'failed');
+                $this->logging($user->id, 'reconfirm', ['message' => $e->getMessage()], 'failed');
                 throw $e;
             }
             $this->logging($user->id, 'reconfirm');
         }
     }
 
+    /**
+     * agree
+     *
+     * @param string $user_id user id
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function agree($user_id)
     {
         try {
@@ -138,20 +174,29 @@ class Handler
 
             $this->sendEmail($user, 'agree');
         } catch (\Exception $e) {
-            $this->logging($user_id, 'agree', ['message'=>$e->getMessage()], 'failed');
+            $this->logging($user_id, 'agree', ['message' => $e->getMessage()], 'failed');
             throw $e;
         }
         $this->logging($user_id, 'agree');
     }
 
+    /**
+     * deny
+     *
+     * @param string      $user_id user id
+     * @param null|string $token   token
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function deny($user_id, $token = null)
     {
         try {
             $user = User::find($user_id);
 
-            if($token !== null) {
+            if ($token !== null) {
                 $mailing = Mailing::where('deny_token', $token)->where('user_id', $user_id)->first();
-                if($mailing === null) {
+                if ($mailing === null) {
                     throw new InvalidTokenException();
                 }
             } else {
@@ -162,16 +207,24 @@ class Handler
             $mailing->status = 'denied';
             $mailing->save();
 
-
-
             $this->sendEmail($user, 'deny');
         } catch (\Exception $e) {
-            $this->logging($user_id, 'deny', ['message'=>$e->getMessage()], 'failed');
+            $this->logging($user_id, 'deny', ['message' => $e->getMessage()], 'failed');
             throw $e;
         }
         $this->logging($user_id, 'deny');
     }
 
+    /**
+     * logging
+     *
+     * @param string $user_id user id
+     * @param string $action  action
+     * @param array  $content content
+     * @param string $result  result
+     *
+     * @return void
+     */
     protected function logging($user_id, $action, $content = [], $result = 'successd')
     {
         // action = agreed, denied, reconfirmed
@@ -183,6 +236,14 @@ class Handler
         $log->save();
     }
 
+    /**
+     * send email
+     *
+     * @param User   $user user model
+     * @param string $type type
+     *
+     * @return void|bool
+     */
     protected function sendEmail($user, $type)
     {
         if (!$user->email) {

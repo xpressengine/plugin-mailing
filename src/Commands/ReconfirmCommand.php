@@ -1,10 +1,35 @@
 <?php
+/**
+ * ReconfirmCommand.php
+ *
+ * This file is part of the Xpressengine package.
+ *
+ * PHP version 5
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        http://www.xpressengine.com
+ */
+
 namespace Xpressengine\Plugins\Mailing\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Xpressengine\Plugins\Mailing\Handler;
 
+/**
+ * ReconfirmCommand
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        http://www.xpressengine.com
+ */
 class ReconfirmCommand extends Command
 {
     /**
@@ -26,11 +51,10 @@ class ReconfirmCommand extends Command
     protected $handler;
 
     /**
-     * Create a new command instance.
+     * ReconfirmCommand constructor.
      *
-     * @param Handler $handler
+     * @param Handler $handler handler
      */
-
     public function __construct(Handler $handler)
     {
         parent::__construct();
@@ -40,7 +64,7 @@ class ReconfirmCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return mixed|void
      */
     public function handle()
     {
@@ -55,15 +79,14 @@ class ReconfirmCommand extends Command
         }
 
         if ($this->input->isInteractive() && $this->confirm(
-                // x 명의 회원에게 이메일을 보내려 합니다. 실행하시겠습니까?
-                "Emails will be sent to $count users. Do you want to execute it?"
-            ) === false
-        ) {
+            // x 명의 회원에게 이메일을 보내려 합니다. 실행하시겠습니까?
+            "Emails will be sent to $count users. Do you want to execute it?"
+        ) === false) {
             $this->warn('Process is canceled by you.');
             return null;
         }
         $count = $this->handler->reconfirm($users);
 
-        $this->warn("[{$now->format('Y.m.d H:i:s')}] Emails were sent to $count users to reconfirm mailing.".PHP_EOL);
+        $this->warn("[{$now->format('Y.m.d H:i:s')}] Emails were sent to $count users to reconfirm mailing." . PHP_EOL);
     }
 }

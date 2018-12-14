@@ -1,4 +1,19 @@
 <?php
+/**
+ * ReconfirmJob.php
+ *
+ * This file is part of the Xpressengine package.
+ *
+ * PHP version 5
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        http://www.xpressengine.com
+ */
+
 namespace Xpressengine\Plugins\Mailing\Jobs;
 
 use DB;
@@ -10,10 +25,13 @@ use Illuminate\Queue\SerializesModels;
 use Xpressengine\Plugins\Mailing\Handler;
 
 /**
- * @category
- * @package     Xpressengine\Plugins\Store\Jobs
- * @author      XE Team (khongchi) <khongchi@xpressengine.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
+ * ReconfirmJob
+ *
+ * @category    Mailing
+ * @package     Xpressengine\Plugins\Mailing
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        http://www.xpressengine.com
  */
 class ReconfirmJob implements ShouldQueue
@@ -26,16 +44,23 @@ class ReconfirmJob implements ShouldQueue
     private $user_ids;
 
     /**
-     * FreezeJob constructor.
+     * ReconfirmJob constructor.
      *
-     * @param string|array $user_ids
-     * @param $type
+     * @param array|string $user_ids user id or user ids
      */
     public function __construct($user_ids)
     {
         $this->user_ids = $user_ids;
     }
 
+    /**
+     * handle
+     *
+     * @param Handler $handler handler
+     *
+     * @return void
+     * @throws \Exception
+     */
     public function handle(Handler $handler)
     {
         DB::beginTransaction();
