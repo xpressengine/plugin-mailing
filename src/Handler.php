@@ -80,12 +80,12 @@ class Handler
         // 동의한 후보 중에 reconfirm을 보내지 않은 후보 선별하기
         $candidates = User::whereHas('mailing', function ($q) use ($eventDate) {
             return $q->where('status', 'agreed')->where('updated_at', '<', $eventDate);
-        })->with(['mailing_logs' => function ($q) {
+        })->with(['mailingLogs' => function ($q) {
             return $q->orderBy('created_at', 'desc');
         }])->get();
 
         foreach ($candidates as $user) {
-            $latestLog = $user->mailing_logs->first();
+            $latestLog = $user->mailingLogs->first();
             if (data_get($latestLog, 'action') !== 'reconfirm') {
                 $users->add($user);
             }
