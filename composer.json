@@ -1,6 +1,6 @@
 {
   "name": "xpressengine-plugin/mailing",
-  "description": "This Package is Xpressengine Plugin - Mailing.",
+  "description": "메일 수신 동의 기능과 발신 기능을 제공합니다.",
   "keywords": [
     "xpressengine",
     "plugin",
@@ -16,7 +16,7 @@
     {
       "name": "XE Developers",
       "email": "developers@xpressengine.com",
-      "homepage": "http://xpressengine.io",
+      "homepage": "https://store.xehub.io/plugins/mailing",
       "role": "Developer"
     }
   ],
